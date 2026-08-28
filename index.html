@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>XINZZ PANEL</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="login" class="screen">
+  <div class="card login-card"><h1> XINZZ PANEL</h1><p>GitHub Pages Dashboard</p>
+    <input id="user" placeholder="Username" autocomplete="username">
+    <input id="pass" type="password" placeholder="Password" autocomplete="current-password">
+    <button onclick="login()">LOGIN</button><small id="err"></small>
+  </div>
+</div>
+<div id="app" class="hidden">
+<header><b>XINZZ PANEL</b><button class="ghost" onclick="logout()">Logout</button></header>
+<main>
+<section class="hero"><div><span class="pill" id="status">OFFLINE</span><h1>Server Dashboard</h1><p>Panel frontend siap dihubungkan ke backend VPS.</p></div></section>
+<div class="grid">
+  <div class="card stat"><span>Status</span><strong id="serverStatus">Offline</strong></div>
+  <div class="card stat"><span>CPU</span><strong id="cpu">—</strong></div>
+  <div class="card stat"><span>RAM</span><strong id="ram">—</strong></div>
+  <div class="card stat"><span>Uptime</span><strong id="uptime">—</strong></div>
+</div>
+<section class="card actions"><h2>Control</h2><div class="buttons">
+<button onclick="control('start')">▶ Start</button><button class="warn" onclick="control('restart')">↻ Restart</button><button class="danger" onclick="control('stop')">■ Stop</button>
+</div></section>
+<section class="card"><h2>QR XINZZ</h2><div class="qrbox"><img id="qr" alt="QR akan tampil dari backend" src="assets/qr-placeholder.svg"></div><p class="muted">QR tidak dibuat/diubah oleh frontend. Backend dapat mengirim QR asli SC.</p></section>
+<section class="card"><h2>Console</h2><pre id="logs">Menunggu koneksi backend...</pre></section>
+<section class="card"><h2>Backend</h2><label>API URL</label><input id="api" placeholder="https://domain-backend-anda.example/api"><button onclick="saveApi()">Simpan API</button></section>
+</main>
+</div>
+<script src="app.js"></script>
+</body></html>

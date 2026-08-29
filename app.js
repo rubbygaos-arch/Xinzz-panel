@@ -13,11 +13,50 @@ function login(){
 function showApp(){ $('login').classList.add('hidden'); $('app').classList.remove('hidden'); poll(); }
 function logout(){ localStorage.removeItem(LOGIN); location.reload(); }
 
-function saveApi(){
-  api=$('api').value.trim().replace(/\/+$/,''); token=$('token').value.trim();
-  if(!/^https?:\/\//i.test(api)){ $('logs').textContent='API URL harus diawali https://'; return; }
-  localStorage.setItem(KEY,api); localStorage.setItem(TOKEN,token);
-  $('logs').textContent='Menghubungkan ke backend...'; poll();
+function normalizeApi(value){
+  return String(value||'').trim().replace(/\/+$/,'');
+}
+async function saveApi(){
+  api=normalizeApi($('api').value); token=$('token').value.trim();
+  if(!/^https?:\/\//i.test(api)){
+    $('logs').textContent='API URL harus diawali https:// atau http://';
+    return;
+  }
+  localStorage.setItem(KEY,api);
+  localStorage.setItem(TOKEN,token);
+  $('apiResult').textContent='Menguji '+api+' ...';
+  $('logs').textContent='Menghubungkan ke backend...';
+  await testApi();
+  await poll();
+}
+async function testApi(){
+  api=normalizeApi($('api').value||api);
+  if(!api){ $('apiResult').textContent='Isi API URL dulu.'; return; }
+  try{
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),15000);
+    const headers={Accept:'application/json'};
+    if(token) headers['x-panel-token']=token;
+    const r=await fetch(api+'/status',{headers,cache:'no-store',signal:controller.signal});
+    clearTimeout(timer);
+    const text=await r.text();
+    let data={};
+    try{ data=text?JSON.parse(text):{} }catch(_){}
+    if(!r.ok) throw new Error((data&&data.message)||('HTTP '+r.status));
+    if(data && data.backend){
+      $('apiResult').textContent='✓ Backend tersambung: '+api;
+      $('status').textContent='BACKEND ONLINE';
+      $('serverStatus').textContent=data.running?'Running':(data.scriptInstalled?'Ready':'Belum ada SC');
+      $('logs').textContent=data.logs||'Backend tersambung. Belum ada log lain.';
+    }else{
+      throw new Error('Endpoint /status tidak mengembalikan backend:true');
+    }
+  }catch(e){
+    $('apiResult').textContent='✗ Gagal: '+e.message;
+    $('logs').textContent='GAGAL TERHUBUNG\nURL: '+api+'\nError: '+e.message+'\n\nPastikan URL port 3000 yang dipakai lengkap dan backend masih berjalan.';
+    $('status').textContent='BACKEND OFF';
+    $('serverStatus').textContent='Offline';
+  }
 }
 async function request(path, options={}){
   if(!api) throw new Error('Isi API URL backend terlebih dahulu');
@@ -67,4 +106,5 @@ async function poll(){
   finally{polling=false}
 }
 if(localStorage.getItem(LOGIN)==='1') showApp();
+// v2.1 FIX CONNECT
 setInterval(poll,4000);

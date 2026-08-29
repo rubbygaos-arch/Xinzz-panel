@@ -12,7 +12,7 @@
 </div></div>
 
 <div id="app" class="hidden">
-<header><b>🤖 XINZZ PANEL v2</b><button class="ghost" onclick="logout()">Logout</button></header>
+<header><b>🤖 XINZZ PANEL v2.1 FIX</b><button class="ghost" onclick="logout()">Logout</button></header>
 <main>
 <section class="hero"><span class="pill" id="status">BACKEND OFF</span><h1>Script Control</h1><p id="scriptName">Belum ada SC yang diupload.</p></section>
 
@@ -45,8 +45,8 @@
 <section class="card"><h2>🔗 Backend</h2>
 <label>API URL</label><input id="api" placeholder="https://namacodespace-3000.app.github.dev">
 <label>Panel Token (opsional)</label><input id="token" type="password" placeholder="Kosong jika PANEL_TOKEN tidak digunakan">
-<button onclick="saveApi()">Simpan & Hubungkan</button>
+<div class="buttons"><button onclick="saveApi()">Simpan & Hubungkan</button><button class="ghost" onclick="testApi()">Tes Backend</button></div><small id="apiResult"></small>
 </section>
-</main></div>
+<p class="muted">Versi panel: v2.1 FIX CONNECT</p></main></div>
 <script src="app.js"></script>
 </body></html>

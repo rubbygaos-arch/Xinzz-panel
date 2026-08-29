@@ -1,24 +1,25 @@
-# XINZZ GitHub Panel
+# XINZZ GitHub Panel v1 — Fixed
 
-Frontend panel statis untuk GitHub Pages.
+Frontend panel untuk backend XINZZ.
 
-## Demo login
-Username: `admin`
-Password: `admin123`
+## API URL
 
-**Ganti kredensial sebelum dipakai sungguhan.** Login demo ini hanya untuk UI; keamanan sebenarnya harus dilakukan oleh backend.
+Masukkan **base URL backend**, tanpa `/status` atau `/control`.
 
-## Deploy ke GitHub Pages
-1. Buat repository baru.
-2. Upload semua isi ZIP ini ke root repository.
-3. Settings → Pages → Deploy from branch → `main` / root.
-4. Buka URL Pages yang diberikan GitHub.
+Contoh:
+`https://glorious-palm-tree-xrvvjqrqqpqrcxr-3000.app.github.dev`
 
-## Backend API
-Panel mengharapkan:
-- `GET /api/status` → `{online,cpu,ram,uptime,qr,logs}`
-- `POST /api/control` body `{action:"start"|"stop"|"restart"}`
+Frontend otomatis memanggil:
+- `GET /status`
+- `POST /control`
 
-Masukkan URL backend pada menu **Backend**.
+## Login demo
 
-Catatan: GitHub Pages tidak menjalankan Node.js/XINZZ SC. SC tetap harus berjalan di VPS/server. QR frontend hanya menampilkan data QR yang dikirim backend; sistem QR SC tidak diubah oleh panel ini.
+- Username: `admin`
+- Password: `admin123`
+
+## Catatan Codespaces
+
+Jika panel masih tidak dapat terhubung, pastikan port **3000** pada GitHub Codespaces diset **Public** dan backend sedang berjalan.
+
+Versi ini menampilkan error koneksi yang lebih jelas di bagian Console.

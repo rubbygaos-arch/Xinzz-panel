@@ -25,9 +25,9 @@
 <section class="card actions"><h2>Control</h2><div class="buttons">
 <button onclick="control('start')">▶ Start</button><button class="warn" onclick="control('restart')">↻ Restart</button><button class="danger" onclick="control('stop')">■ Stop</button>
 </div></section>
-<section class="card"><h2>QR XINZZ</h2><div class="qrbox"><img id="qr" alt="QR akan tampil dari backend" src="assets/qr-placeholder.svg"></div><p class="muted">QR tidak dibuat/diubah oleh frontend. Backend dapat mengirim QR asli SC.</p></section>
+<section class="card"><h2>QR XINZZ</h2><div class="qrbox"><img id="qr" alt="QR akan tampil dari backend" src="qr-placeholder.svg"></div><p class="muted">QR tidak dibuat/diubah oleh frontend. Backend dapat mengirim QR asli SC.</p></section>
 <section class="card"><h2>Console</h2><pre id="logs">Menunggu koneksi backend...</pre></section>
-<section class="card"><h2>Backend</h2><label>API URL</label><input id="api" placeholder="https://domain-backend-anda.example/api"><button onclick="saveApi()">Simpan API</button></section>
+<section class="card"><h2>Backend</h2><label>API URL</label><input id="api" placeholder="https://domain-backend-anda.example"><button onclick="saveApi()">Simpan API</button></section>
 </main>
 </div>
 <script src="app.js"></script>

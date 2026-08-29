@@ -1,25 +1,16 @@
-# XINZZ GitHub Panel v1 — Fixed
+# XINZZ PANEL v2
 
-Frontend panel untuk backend XINZZ.
+Panel frontend untuk backend XINZZ Panel Backend v2.
 
-## API URL
+Login demo:
+- username: admin
+- password: admin123
 
-Masukkan **base URL backend**, tanpa `/status` atau `/control`.
+Setelah backend aktif:
+1. Isi API URL.
+2. Upload ZIP SC.
+3. Tekan Install Dependency.
+4. Pantau Console sampai selesai.
+5. Tekan Start.
 
-Contoh:
-`https://glorious-palm-tree-xrvvjqrqqpqrcxr-3000.app.github.dev`
-
-Frontend otomatis memanggil:
-- `GET /status`
-- `POST /control`
-
-## Login demo
-
-- Username: `admin`
-- Password: `admin123`
-
-## Catatan Codespaces
-
-Jika panel masih tidak dapat terhubung, pastikan port **3000** pada GitHub Codespaces diset **Public** dan backend sedang berjalan.
-
-Versi ini menampilkan error koneksi yang lebih jelas di bagian Console.
+Catatan: Login frontend demo bukan keamanan server. Gunakan PANEL_TOKEN pada backend jika port dibuat publik.

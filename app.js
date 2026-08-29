@@ -1,131 +1,70 @@
-const KEY='xinzz_panel_api', LOGIN='xinzz_panel_login';
-const DEFAULT_API='https://glorious-palm-tree-xrvvjqrqqpqrcxr-3000.app.github.dev';
+const KEY='xinzz_panel_api', LOGIN='xinzz_panel_login', TOKEN='xinzz_panel_token';
 const $=id=>document.getElementById(id);
-let api=(localStorage.getItem(KEY)||DEFAULT_API).trim().replace(/\/+$/,'');
+let api=(localStorage.getItem(KEY)||'').trim().replace(/\/+$/,'');
+let token=localStorage.getItem(TOKEN)||'';
 let polling=false;
-
-$('api').value=api;
+$('api').value=api; $('token').value=token;
 
 function login(){
   const u=$('user').value.trim(), p=$('pass').value;
-  if(u==='admin'&&p==='admin123'){
-    localStorage.setItem(LOGIN,'1');
-    showApp();
-  }else{
-    $('err').textContent='Username/password demo salah.';
-  }
+  if(u==='admin'&&p==='admin123'){ localStorage.setItem(LOGIN,'1'); showApp(); }
+  else $('err').textContent='Username/password salah.';
 }
-
-function showApp(){
-  $('login').classList.add('hidden');
-  $('app').classList.remove('hidden');
-  poll();
-}
-
-function logout(){
-  localStorage.removeItem(LOGIN);
-  location.reload();
-}
+function showApp(){ $('login').classList.add('hidden'); $('app').classList.remove('hidden'); poll(); }
+function logout(){ localStorage.removeItem(LOGIN); location.reload(); }
 
 function saveApi(){
-  api=$('api').value.trim().replace(/\/+$/,'');
-  if(!/^https?:\/\//i.test(api)){
-    $('logs').textContent='API URL harus diawali http:// atau https://';
-    return;
-  }
-  localStorage.setItem(KEY,api);
-  $('logs').textContent='Menguji koneksi ke '+api+' ...';
-  poll();
+  api=$('api').value.trim().replace(/\/+$/,''); token=$('token').value.trim();
+  if(!/^https?:\/\//i.test(api)){ $('logs').textContent='API URL harus diawali https://'; return; }
+  localStorage.setItem(KEY,api); localStorage.setItem(TOKEN,token);
+  $('logs').textContent='Menghubungkan ke backend...'; poll();
 }
-
-async function request(path,options={}){
-  if(!api) throw new Error('API URL belum diisi');
-
-  const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),10000);
-
+async function request(path, options={}){
+  if(!api) throw new Error('Isi API URL backend terlebih dahulu');
+  const controller=new AbortController(), timer=setTimeout(()=>controller.abort(),30000);
   try{
-    const headers={'Accept':'application/json',...(options.headers||{})};
-    if(options.body!==undefined) headers['Content-Type']='application/json';
-
-    const r=await fetch(api+path,{
-      ...options,
-      headers,
-      signal:controller.signal,
-      cache:'no-store',
-      mode:'cors'
-    });
-
-    const text=await r.text();
-    let data;
-    try{ data=text ? JSON.parse(text) : {}; }
-    catch{ data={message:text}; }
-
-    if(!r.ok){
-      throw new Error('HTTP '+r.status+(data.message?': '+data.message:''));
-    }
+    const headers={Accept:'application/json',...(options.headers||{})};
+    if(token) headers['x-panel-token']=token;
+    const r=await fetch(api+path,{...options,headers,signal:controller.signal,cache:'no-store'});
+    const text=await r.text(); let data={};
+    try{data=text?JSON.parse(text):{}}catch{data={message:text}}
+    if(!r.ok) throw new Error(data.message||('HTTP '+r.status));
     return data;
-  }catch(e){
-    if(e.name==='AbortError') throw new Error('Request timeout (10 detik)');
-    if(e instanceof TypeError) {
-      throw new Error('Gagal mengakses backend. Cek URL, CORS, dan akses port 3000.');
-    }
-    throw e;
-  }finally{
-    clearTimeout(timeout);
-  }
+  }catch(e){ if(e.name==='AbortError') throw new Error('Request timeout'); throw e; }
+  finally{clearTimeout(timer)}
 }
-
-function setConnected(on){
-  $('status').textContent=on?'ONLINE':'BACKEND OFF';
-  $('serverStatus').textContent=on?'Online':'Backend offline';
-}
-
-async function control(action){
+function setMsg(msg){ $('logs').textContent=msg+'\n'+$('logs').textContent; }
+async function uploadSC(){
+  const file=$('scFile').files[0];
+  if(!file){ alert('Pilih ZIP SC terlebih dahulu'); return; }
   try{
-    const d=await request('/control',{
-      method:'POST',
-      body:JSON.stringify({action})
-    });
-    $('logs').textContent=(d.message||'Perintah terkirim')+'\n'+$('logs').textContent;
-    setTimeout(poll,500);
-  }catch(e){
-    $('logs').textContent='Gagal menjalankan '+action+': '+e.message+'\n'+$('logs').textContent;
-  }
+    const fd=new FormData(); fd.append('script',file);
+    $('logs').textContent='Mengupload '+file.name+' ...';
+    const d=await request('/upload',{method:'POST',body:fd});
+    setMsg(d.message||'Upload berhasil');
+    await poll();
+  }catch(e){setMsg('UPLOAD GAGAL: '+e.message)}
 }
-
+async function installSC(){
+  try{const d=await request('/install',{method:'POST'});setMsg(d.message||'Install dimulai');}
+  catch(e){setMsg('INSTALL GAGAL: '+e.message)}
+}
+async function control(action){
+  try{const d=await request('/control',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action})});setMsg(d.message||'OK');setTimeout(poll,700);}
+  catch(e){setMsg('CONTROL GAGAL: '+e.message)}
+}
 async function poll(){
-  if(polling) return;
-  if(!api){
-    setConnected(false);
-    $('logs').textContent='Isi API URL backend untuk mengaktifkan kontrol.';
-    return;
-  }
-
-  polling=true;
+  if(polling||!api) return; polling=true;
   try{
     const d=await request('/status');
-    setConnected(true);
-
-    $('cpu').textContent=d.cpu ?? '—';
-    $('ram').textContent=d.ram ?? '—';
-    $('uptime').textContent=d.uptime ?? '—';
-
-    if(d.qr) $('qr').src=d.qr;
-
+    $('status').textContent=d.backend?'BACKEND ONLINE':'BACKEND OFF';
+    $('serverStatus').textContent=d.running?'Running':(d.scriptInstalled?'Ready':'Belum siap');
+    $('cpu').textContent=d.cpu??'—'; $('ram').textContent=d.ram??'—'; $('uptime').textContent=d.uptime??'—';
+    $('scriptName').textContent=d.script?`${d.script.name} v${d.script.version}`:'Belum ada SC yang diupload.';
     if(d.logs) $('logs').textContent=d.logs;
-    else $('logs').textContent='Backend terhubung. Menunggu log...';
-  }catch(e){
-    setConnected(false);
-    $('logs').textContent=
-      'Tidak dapat terhubung ke backend.\n'+
-      'URL: '+api+'\n'+
-      'Error: '+e.message+'\n\n'+
-      'Pastikan port 3000 Codespaces dapat diakses publik dan backend sedang berjalan.';
-  }finally{
-    polling=false;
-  }
+    if(d.qr) $('qr').src=d.qr;
+  }catch(e){$('status').textContent='BACKEND OFF';$('serverStatus').textContent='Offline';$('logs').textContent='Tidak dapat terhubung: '+e.message;}
+  finally{polling=false}
 }
-
 if(localStorage.getItem(LOGIN)==='1') showApp();
-setInterval(poll,5000);
+setInterval(poll,4000);
